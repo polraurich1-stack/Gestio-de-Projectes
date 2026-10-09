@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turismo y presión urbana en Barcelona</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<style>
+:root{--c0:#f7efd9;--c1:#ecd49a;--c2:#d9ae55;--c3:#a8741f;--c4:#5e3a10;--ink:#2b2013;--mut:#7a6a55;--bg:#f8f7f4;--card:#fff;--line:#e6e0d4}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,.kpi b{font-family:Georgia,"Iowan Old Style",serif;font-weight:700}
+nav{display:flex;gap:6px;margin-bottom:10px}nav a{padding:5px 12px;border:1px solid var(--line);border-radius:6px;color:var(--c4);text-decoration:none;font-size:.9rem;background:#fff}nav a.on{background:var(--c4);color:#fff;border-color:var(--c4)}
+header{padding:24px 20px 8px;max-width:1200px;margin:auto}
+h1{margin:0;font-size:1.7rem;color:var(--c4)}
+header p{margin:4px 0 0;color:var(--mut)}
+main{max-width:1200px;margin:auto;padding:12px 20px 24px}
+.bar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:end;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.bar label{display:flex;flex-direction:column;font-size:.8rem;color:var(--mut);gap:3px}
+.bar select,.bar input[type=file]{font:inherit;color:var(--ink);padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.bar .chk{flex-direction:row;align-items:center;gap:6px;font-size:.9rem;color:var(--ink);padding-bottom:6px}
+#msg{margin:10px 0;color:var(--c3);font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c3);border-radius:8px;padding:12px 14px}
+.kpi b{display:block;font-size:1.9rem;color:var(--c4);line-height:1.15}
+.kpi span{font-size:.82rem;color:var(--mut)}
+.grid{display:grid;grid-template-columns:3fr 2fr;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.card h2{margin:0 0 8px;font-size:1.05rem;color:var(--c4)}
+#mapbox{position:relative}
+#map{height:520px;border-radius:6px}
+#info{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:.82rem;max-width:210px;pointer-events:none}
+#legend{position:absolute;bottom:22px;left:10px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:.78rem}
+#legend div{display:flex;align-items:center;gap:6px}
+#legend i{width:16px;height:12px;border-radius:2px;display:inline-block}
+.cv{position:relative;height:480px}
+.wide{margin-top:12px}.wide .cv{height:300px}
+footer{max-width:1200px;margin:auto;padding:4px 20px 28px;color:var(--mut);font-size:.8rem}
+@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.grid,.grid.row2{grid-template-columns:1fr}#map{height:400px}.cv{height:380px}}
+
+.bar button{font:inherit;padding:7px 12px;border:0;border-radius:6px;background:var(--c4);color:#fff;cursor:pointer}.bar button:hover{background:var(--c3)}
+.files{display:flex;flex-wrap:wrap;gap:10px 14px}.files small{font-size:.72rem;color:var(--c3)}.bad{color:#b3261e!important}
+details.note{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c2);border-radius:8px;padding:8px 14px;margin:12px 0;font-size:.9rem}
+details.note summary{cursor:pointer;font-weight:600;color:var(--c4)}
+.sel{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px;font-size:.85rem}
+.sel select{font:inherit;padding:3px 5px;border:1px solid var(--line);border-radius:6px;max-width:100%}
+.grid.row2{margin-top:12px;grid-template-columns:1fr 1fr}.row2 .cv{height:380px}
+article{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 22px 18px;max-width:860px}
+article h2{font-size:1.15rem;color:var(--c4);margin:20px 0 6px}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin:6px 0}td,th{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top;word-break:break-word}th{color:var(--c4)}
+code{background:var(--c0);padding:1px 5px;border-radius:4px;font-size:.85em}
+</style></head><body>
+<header><nav><a class="on" href="dashboard_turismo_urbano.html">Dashboard</a><a href="explicacion_datos.html">Explicación y datos</a></nav><h1>Turismo y presión urbana en Barcelona</h1><p>Viviendas turísticas, población, renta e incidentes por barrio</p></header>
+<main>
+<details class="note" open><summary>¿Qué estoy viendo?</summary>Cada barrio de Barcelona tiene varias cifras: cuántas viviendas turísticas (HUT) hay, cuánta gente vive, qué renta por persona tiene y cuántos incidentes atiende la Guardia Urbana. El mapa y el ranking muestran un indicador a tu elección; el gráfico de dispersión cruza dos indicadores para ver si se relacionan (r cercano a 1 o −1 indica relación fuerte, cercano a 0 indica que no hay). Pulsa el botón de la carpeta para cargar de una vez todos los CSV (el navegador recordará la última carpeta elegida), o carga cada archivo por separado: cada uno activa nuevos indicadores. Cómo conseguirlos: página «Explicación y datos».</details>
+<div class="bar"><button id="dirbtn" type="button">📁 Cargar carpeta entrega_dashboard</button><input type="file" id="dirin" webkitdirectory multiple hidden><div class="files" id="files"></div>
+<label>Indicador del mapa<select id="ind"></select></label>
+<label>Distrito<select id="dist"><option value="all">Toda la ciudad</option></select></label>
+<label class="chk"><input type="checkbox" id="pts"> Mostrar cada HUT como un punto</label></div>
+<div id="msg">Pulsa «Cargar carpeta entrega_dashboard» y elige la carpeta con los CSV, o carga cada archivo por separado.</div>
+<section class="kpis">
+<div class="kpi"><b id="k1">–</b><span>Viviendas turísticas</span></div>
+<div class="kpi"><b id="k2">–</b><span>Población</span></div>
+<div class="kpi"><b id="k3">–</b><span>HUT por 1.000 habitantes</span></div>
+<div class="kpi"><b id="k4">–</b><span>Incidentes por 1.000 habitantes</span></div></section>
+<section class="grid">
+<div class="card"><h2>Mapa por barrios: <span class="in">indicador</span></h2><div id="mapbox"><div id="map"></div><div id="info">Pasa el ratón por un barrio</div><div id="legend"></div></div></div>
+<div class="card"><h2>10 barrios con más valor: <span class="in">indicador</span></h2><div class="cv"><canvas id="c1"></canvas></div></div></section>
+<section class="grid row2">
+<div class="card"><h2>Relación entre dos indicadores <small id="rr"></small></h2><div class="sel"><select id="sx"></select><span>frente a</span><select id="sy"></select></div><div class="cv"><canvas id="c3"></canvas></div></div>
+<div class="card"><h2>Por distrito: <span class="in">indicador</span></h2><div class="cv"><canvas id="c2"></canvas></div></div></section>
+</main>
+<footer>Fuente: Open Data BCN (Ajuntament de Barcelona), licencia CC BY 4.0 · Mapa base: OpenFreeMap, © OpenStreetMap</footer>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script>
+const GEO_URL='https://raw.githubusercontent.com/martgnz/bcn-geodata/master/barris/barris.geojson';
+const COL=['#f7efd9','#ecd49a','#d9ae55','#a8741f','#5e3a10'];
+const DN={'01':'Ciutat Vella','02':"L'Eixample",'03':'Sants-Montjuïc','04':'Les Corts','05':'Sarrià-Sant Gervasi','06':'Gràcia','07':'Horta-Guinardó','08':'Nou Barris','09':'Sant Andreu','10':'Sant Martí'};
+const SRC={hut:'Viviendas turísticas (HUT)',pad:'Población (padrón)',renda:'Renta familiar',gub:'Incidentes Guardia Urbana'};
+const MET={hut:{n:'Viviendas turísticas',d:0,r:['hut']},pla:{n:'Plazas turísticas',d:0,r:['hut']},den:{n:'HUT por km²',d:1,r:['hut']},
+ hut1000:{n:'HUT por 1.000 hab.',d:1,r:['hut','pad']},pob:{n:'Población',d:0,r:['pad']},renda:{n:'Renta disponible por persona (€)',d:0,r:['renda']},
+ inc:{n:'Incidentes Guardia Urbana',d:0,r:['gub']},inc1000:{n:'Incidentes por 1.000 hab.',d:1,r:['gub','pad']}};
+const $=id=>document.getElementById(id);
+const fail=m=>{$('msg').textContent=m};
+window.addEventListener('error',e=>fail('Error: '+(e.message||'desconocido')+(e.filename?' ('+e.filename.split('/').pop()+':'+e.lineno+')':'')));
+['Papa','Chart','maplibregl'].filter(n=>!window[n]).forEach(n=>fail('No se pudo cargar la librería '+n+'. Comprueba tu conexión a internet.'));
+const fmt=(v,d=0)=>v.toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:'always'});
+const pad=s=>String(s??'').trim().padStart(2,'0');
+const nz=s=>String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+const num=v=>parseFloat(String(v).replace(',','.'));
+const yr=s=>{const m=String(s).match(/(?:19|20)\d\d/);return m?+m[0]:0};
+const nv=v=>v==null||isNaN(v)||!isFinite(v)?-1:v;
+const Z={hut:0,pla:0,pob:0,renda:null,inc:0};
+let U={},S={},D={},NAME={},geo=null,map,mapReady=false,charts={},lastDist=null;
+const av=()=>Object.keys(MET).filter(k=>MET[k].r.every(s=>S[s]));
+const V=(k,o,a)=>{switch(k){case'hut':return o.hut;case'pla':return o.pla;case'den':return o.hut/(a/1e6);case'pob':return o.pob;case'renda':return o.renda;case'inc':return o.inc;
+ case'hut1000':return o.pob?o.hut/o.pob*1000:null;case'inc1000':return o.pob?o.inc/o.pob*1000:null}};
+
+// ---- Carga de archivos ----
+$('files').innerHTML=Object.entries(SRC).map(([k,n])=>`<label>${n}<input type="file" accept=".csv" id="f_${k}"><small id="st_${k}">sin cargar</small></label>`).join('');
+Object.keys(DN).forEach(c=>$('dist').add(new Option(DN[c],c)));
+function loadFile(k,f){$('msg').textContent='Leyendo '+f.name+'…';
+  Papa.parse(f,{header:true,skipEmptyLines:true,transformHeader:nz,complete:r=>{S[k]=r.data;$('msg').textContent='';lastDist=null;build();refresh();update()}});}
+Object.keys(SRC).forEach(k=>$('f_'+k).addEventListener('change',e=>{const f=e.target.files[0];if(f)loadFile(k,f)}));
+// carga de una carpeta completa: reconoce cada CSV por su nombre
+const PAT={hut:/hut_comunicacio/i,pad:/pad_mdbas/i,renda:/renda/i,gub:/incidents/i};
+function useFiles(list){
+  const fs=[...list];let n=0;
+  Object.keys(PAT).forEach(k=>{const c=fs.filter(f=>/\.csv$/i.test(f.name)&&PAT[k].test(f.name)).sort((a,b)=>yr(b.name)-yr(a.name)||a.name.length-b.name.length)[0];if(c){n++;loadFile(k,c)}});
+  const gj=fs.find(f=>/barris.*\.geojson$/i.test(f.name));
+  if(gj&&!geo)gj.text().then(t=>{geo=JSON.parse(t);build();refresh();update()});
+  if(!n)fail('No encontré CSV en esa carpeta (busco nombres con hut_comunicacio, pad_mdbas, renda e incidents).');
+}
+$('dirbtn').addEventListener('click',async()=>{
+  if(window.showDirectoryPicker){try{const h=await showDirectoryPicker({id:'entrega_dashboard',mode:'read'});const fs=[];
+    for await(const e of h.values())if(e.kind==='file')fs.push(await e.getFile());useFiles(fs);return}catch(e){if(e.name==='AbortError')return}}
+  $('dirin').click()});
+$('dirin').addEventListener('change',e=>useFiles(e.target.files));
+['ind','sx','sy'].forEach(id=>$(id).addEventListener('change',()=>U[id]=1));
+['ind','dist','pts','sx','sy'].forEach(id=>$(id).addEventListener('change',update));
+fetch(GEO_URL).then(r=>r.json()).then(g=>{geo=g;build();refresh();update()}).catch(()=>fail('No se pudo cargar el GeoJSON de barrios. Comprueba tu conexión a internet.'));
+
+const latest=R=>{const k=['any','datareferencia','dataref','data','year'].find(k=>k in R[0]);if(!k)return R;const m=Math.max(...R.map(r=>yr(r[k])));return R.filter(r=>yr(r[k])===m)};
+const vcol=(R,pref)=>{const ks=Object.keys(R[0]).filter(k=>!/^(codi|nomdistricte|nombarri)/.test(k));return ks.find(k=>pref.some(p=>k.includes(p)))||ks[ks.length-1]};
+
+// agrega todas las fuentes por código de barrio
+function build(){
+  if(!geo)return;D={};const M={};NAME={};
+  geo.features.forEach(f=>NAME[nz(f.properties.NOM)]=f.properties.BARRI);
+  const bc=r=>{const c=String(r.codibarri??'').trim();return c?pad(c):NAME[nz(r.nombarri??'')]||null};
+  const g=(c,k)=>{(M[k]=M[k]||new Set()).add(c);return D[c]||(D[c]={hut:0,pla:0,pob:0,renda:null,inc:0,rs:0,rn:0})};
+  if(S.hut)S.hut.forEach(r=>{const c=bc(r);if(!c)return;const o=g(c,'hut');o.hut++;o.pla+=num(r.numeroplaces)||0});
+  if(S.pad&&S.pad.length){const R=latest(S.pad),k=vcol(R,['nombre','valor','poblacio','habitants','total']);R.forEach(r=>{const c=bc(r),v=num(r[k]);if(c&&!isNaN(v))g(c,'pad').pob+=v})}
+  if(S.renda&&S.renda.length){const R=latest(S.renda),k=vcol(R,['import','indexrfd','rfd','renda']);R.forEach(r=>{const c=bc(r),v=num(r[k]);if(c&&!isNaN(v)){const o=g(c,'renda');o.rs+=v;o.rn++}})}
+  if(S.gub)S.gub.forEach(r=>{const c=bc(r),v=r.numeroincidentsgub!==undefined?num(r.numeroincidentsgub):1;if(c&&!isNaN(v))g(c,'gub').inc+=v});
+  Object.values(D).forEach(o=>{if(o.rn)o.renda=o.rs/o.rn});
+  Object.keys(SRC).forEach(k=>{const e=$('st_'+k),n=M[k]?M[k].size:0;
+    e.textContent=S[k]?`✓ ${fmt(S[k].length)} filas · ${n} barrios`:'sin cargar';e.className=S[k]&&!n?'bad':'';
+    if(S[k]&&!n)fail('No se encontró la columna de barrio en «'+SRC[k]+'». Revisa que sea el CSV correcto.')});
+}
+function refresh(){
+  const a=av();
+  [['ind','hut'],['sx','renda'],['sy','hut1000']].forEach(([id,def])=>{const s=$(id),cur=s.value;
+    s.innerHTML=a.map(k=>`<option value="${k}">${MET[k].n}</option>`).join('');s.value=U[id]&&a.includes(cur)?cur:a.includes(def)?def:a[0]||''});
+  if(a.length>1&&$('sx').value===$('sy').value)$('sy').value=a.find(k=>k!==$('sx').value);
+}
+
+// ---- Mapa ----
+try{map=new maplibregl.Map({container:'map',style:'https://tiles.openfreemap.org/styles/positron',center:[2.1734,41.3985],zoom:11});
+map.addControl(new maplibregl.NavigationControl({showCompass:false}));
+map.on('load',()=>{
+  const empty={type:'FeatureCollection',features:[]};
+  map.addSource('barris',{type:'geojson',data:empty});map.addSource('pts',{type:'geojson',data:empty});
+  map.addLayer({id:'fill',type:'fill',source:'barris',paint:{'fill-color':'#e4e1da','fill-opacity':.85}});
+  map.addLayer({id:'line',type:'line',source:'barris',paint:{'line-color':'#fff','line-width':1}});
+  map.addLayer({id:'pts',type:'circle',source:'pts',layout:{visibility:'none'},paint:{'circle-radius':2.5,'circle-color':'#3b2508','circle-opacity':.55,'circle-stroke-width':.4,'circle-stroke-color':'#fff'}});
+  map.on('mousemove','fill',e=>{const p=e.features[0].properties;
+    $('info').innerHTML=`<b>${p.NOM}</b><br>${DN[p.DISTRICTE]||''}`+av().filter(k=>p['m_'+k]>=0).map(k=>`<br>${MET[k].n}: ${fmt(+p['m_'+k],MET[k].d)}`).join('')});
+  map.on('mouseleave','fill',()=>$('info').textContent='Pasa el ratón por un barrio');
+  mapReady=true;update();
+});}catch(err){fail('No se pudo iniciar el mapa (¿WebGL desactivado?): '+err.message)}
+
+function bbox(feats){let b=[180,90,-180,-90];
+  const w=c=>typeof c[0]==='number'?(b=[Math.min(b[0],c[0]),Math.min(b[1],c[1]),Math.max(b[2],c[0]),Math.max(b[3],c[1])]):c.forEach(w);
+  feats.forEach(f=>w(f.geometry.coordinates));return b}
+function lr(p){const n=p.length,mx=p.reduce((s,q)=>s+q.x,0)/n,my=p.reduce((s,q)=>s+q.y,0)/n;let a=0,b=0,c=0;
+  p.forEach(q=>{a+=(q.x-mx)*(q.y-my);b+=(q.x-mx)**2;c+=(q.y-my)**2});return{r:a/Math.sqrt(b*c)||0,m:a/b||0,mx,my}}
+function mk(id,cfg){if(charts[id])charts[id].destroy();charts[id]=new Chart($(id),cfg)}
+
+// ---- Actualización ----
+function update(){
+  const a=av();if(!geo||!a.length||!$('ind').value)return;
+  const ind=$('ind').value,sx=$('sx').value,sy=$('sy').value,dist=$('dist').value,d=MET[ind].d;
+  const sel=!S.hut?[]:dist==='all'?S.hut:S.hut.filter(r=>pad(r.codidistricte)===dist);
+  document.querySelectorAll('.in').forEach(e=>e.textContent=MET[ind].n);
+  geo.features.forEach(f=>{const p=f.properties,o=D[p.BARRI]||Z;p.vis=(dist==='all'||p.DISTRICTE===dist)?1:0;
+    Object.keys(MET).forEach(k=>p['m_'+k]=nv(V(k,o,p.AREA)));p.val=p['m_'+ind]});
+  const vis=geo.features.filter(f=>f.properties.vis),sum=k=>vis.reduce((s,f)=>s+((D[f.properties.BARRI]||Z)[k]||0),0);
+  const pob=sum('pob');
+  $('k1').textContent=S.hut?fmt(sel.length):'–';$('k2').textContent=S.pad?fmt(pob):'–';
+  $('k3').textContent=S.hut&&S.pad&&pob?fmt(sum('hut')/pob*1000,1):'–';
+  $('k4').textContent=S.gub&&S.pad&&pob?fmt(sum('inc')/pob*1000,1):'–';
+  // mapa
+  const vs=vis.map(f=>f.properties.val).filter(v=>v>0).sort((x,y)=>x-y);
+  let brk=[.2,.4,.6,.8].map(q=>vs.length?+vs[Math.floor(q*vs.length)].toFixed(d):0).filter(v=>v>0);
+  brk=brk.filter((v,i)=>i===0||v>brk[i-1]);
+  const step=brk.length?['step',['get','val'],COL[0],...brk.flatMap((b,i)=>[b,COL[i+1]])]:COL[2];
+  if(mapReady){
+    map.getSource('barris').setData(geo);
+    map.setPaintProperty('fill','fill-color',['case',['all',['==',['get','vis'],1],['>=',['get','val'],0]],step,'#e4e1da']);
+    map.getSource('pts').setData({type:'FeatureCollection',features:sel.filter(r=>isFinite(num(r.longitudx))&&isFinite(num(r.latitudy))).map(r=>({type:'Feature',properties:{},geometry:{type:'Point',coordinates:[num(r.longitudx),num(r.latitudy)]}}))});
+    map.setLayoutProperty('pts','visibility',$('pts').checked?'visible':'none');
+    if(lastDist!==dist){const b=bbox(vis);map.fitBounds([[b[0],b[1]],[b[2],b[3]]],{padding:30,duration:600});lastDist=dist}
+  }
+  const lab=i=>i===0?`< ${fmt(brk[0],d)}`:i===brk.length?`≥ ${fmt(brk[i-1],d)}`:`${fmt(brk[i-1],d)} – ${fmt(brk[i],d)}`;
+  $('legend').innerHTML=brk.length?COL.slice(0,brk.length+1).map((c,i)=>`<div><i style="background:${c}"></i>${lab(i)}</div>`).join(''):'<div>Sin datos</div>';
+  // top 10
+  const top=vis.filter(f=>f.properties.val>=0).sort((x,y)=>y.properties.val-x.properties.val).slice(0,10);
+  mk('c1',{type:'bar',data:{labels:top.map(f=>f.properties.NOM),datasets:[{data:top.map(f=>+f.properties.val.toFixed(d)),backgroundColor:COL[3]}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{autoSkip:false}}}}});
+  // dispersión
+  const pts=vis.map(f=>({x:f.properties['m_'+sx],y:f.properties['m_'+sy],n:f.properties.NOM})).filter(q=>q.x>=0&&q.y>=0);
+  const ds=[{type:'scatter',data:pts,backgroundColor:COL[3]+'cc',pointRadius:4}];
+  if(pts.length>2){const L=lr(pts),xs=pts.map(q=>q.x),x1=Math.min(...xs),x2=Math.max(...xs);
+    ds.push({type:'line',data:[{x:x1,y:L.my+L.m*(x1-L.mx)},{x:x2,y:L.my+L.m*(x2-L.mx)}],borderColor:COL[4],borderWidth:2,pointRadius:0});
+    $('rr').textContent=`· r = ${fmt(L.r,2)} (${pts.length} barrios)`}else $('rr').textContent='';
+  mk('c3',{type:'scatter',data:{datasets:ds},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{filter:i=>i.datasetIndex===0,callbacks:{label:c=>`${c.raw.n}: ${fmt(c.raw.x,MET[sx].d)} · ${fmt(c.raw.y,MET[sy].d)}`}}},
+    scales:{x:{title:{display:true,text:MET[sx].n}},y:{title:{display:true,text:MET[sy].n}}}}});
+  // distritos
+  const T={};Object.keys(DN).forEach(c=>T[c]={hut:0,pla:0,pob:0,inc:0,a:0,rs:0,rw:0});
+  geo.features.forEach(f=>{const p=f.properties,t=T[p.DISTRICTE],o=D[p.BARRI];if(!t)return;t.a+=p.AREA;
+    if(o){t.hut+=o.hut;t.pla+=o.pla;t.pob+=o.pob;t.inc+=o.inc;if(o.renda!=null){const w=o.pob||1;t.rs+=o.renda*w;t.rw+=w}}});
+  const codes=Object.keys(DN);
+  mk('c2',{type:'bar',data:{labels:codes.map(c=>DN[c]),datasets:[{data:codes.map(c=>{const t=T[c];t.renda=t.rw?t.rs/t.rw:null;const v=nv(V(ind,t,t.a));return v<0?0:+v.toFixed(d)}),
+    backgroundColor:codes.map(c=>dist==='all'?COL[3]:c===dist?COL[4]:COL[1])}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+}
+</script></body></html>

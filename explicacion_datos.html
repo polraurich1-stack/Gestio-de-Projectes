@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explicación y obtención de datos · Turismo y presión urbana</title>
+<style>
+:root{--c0:#f7efd9;--c1:#ecd49a;--c2:#d9ae55;--c3:#a8741f;--c4:#5e3a10;--ink:#2b2013;--mut:#7a6a55;--bg:#f8f7f4;--card:#fff;--line:#e6e0d4}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,.kpi b{font-family:Georgia,"Iowan Old Style",serif;font-weight:700}
+nav{display:flex;gap:6px;margin-bottom:10px}nav a{padding:5px 12px;border:1px solid var(--line);border-radius:6px;color:var(--c4);text-decoration:none;font-size:.9rem;background:#fff}nav a.on{background:var(--c4);color:#fff;border-color:var(--c4)}
+header{padding:24px 20px 8px;max-width:1200px;margin:auto}
+h1{margin:0;font-size:1.7rem;color:var(--c4)}
+header p{margin:4px 0 0;color:var(--mut)}
+main{max-width:1200px;margin:auto;padding:12px 20px 24px}
+.bar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:end;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.bar label{display:flex;flex-direction:column;font-size:.8rem;color:var(--mut);gap:3px}
+.bar select,.bar input[type=file]{font:inherit;color:var(--ink);padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.bar .chk{flex-direction:row;align-items:center;gap:6px;font-size:.9rem;color:var(--ink);padding-bottom:6px}
+#msg{margin:10px 0;color:var(--c3);font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c3);border-radius:8px;padding:12px 14px}
+.kpi b{display:block;font-size:1.9rem;color:var(--c4);line-height:1.15}
+.kpi span{font-size:.82rem;color:var(--mut)}
+.grid{display:grid;grid-template-columns:3fr 2fr;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.card h2{margin:0 0 8px;font-size:1.05rem;color:var(--c4)}
+#mapbox{position:relative}
+#map{height:520px;border-radius:6px}
+#info{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:.82rem;max-width:210px;pointer-events:none}
+#legend{position:absolute;bottom:22px;left:10px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:.78rem}
+#legend div{display:flex;align-items:center;gap:6px}
+#legend i{width:16px;height:12px;border-radius:2px;display:inline-block}
+.cv{position:relative;height:480px}
+.wide{margin-top:12px}.wide .cv{height:300px}
+footer{max-width:1200px;margin:auto;padding:4px 20px 28px;color:var(--mut);font-size:.8rem}
+@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}#map{height:400px}.cv{height:380px}}
+
+.files{display:flex;flex-wrap:wrap;gap:10px 14px}.files small{font-size:.72rem;color:var(--c3)}.bad{color:#b3261e!important}
+details.note{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c2);border-radius:8px;padding:8px 14px;margin:12px 0;font-size:.9rem}
+details.note summary{cursor:pointer;font-weight:600;color:var(--c4)}
+.sel{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px;font-size:.85rem}
+.sel select{font:inherit;padding:3px 5px;border:1px solid var(--line);border-radius:6px;max-width:100%}
+.row2{margin-top:12px}.row2 .cv{height:380px}
+article{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 22px 18px;max-width:860px}
+article h2{font-size:1.15rem;color:var(--c4);margin:20px 0 6px}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin:6px 0}td,th{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top;word-break:break-word}th{color:var(--c4)}
+code{background:var(--c0);padding:1px 5px;border-radius:4px;font-size:.85em}
+</style></head><body>
+<header><nav><a href="dashboard_turismo_urbano.html">Dashboard</a><a class="on" href="explicacion_datos.html">Explicación y datos</a></nav><h1>Explicación y obtención de datos</h1><p>Qué hace el dashboard, de dónde salen los datos y cómo se procesan</p></header>
+<main><article>
+<h2>En pocas palabras</h2>
+<p>El dashboard compara los 73 barrios de Barcelona con cuatro fuentes públicas: viviendas turísticas, población, renta familiar e incidentes de la Guardia Urbana. La pregunta de fondo es si la presión turística coincide con barrios de más o menos renta, más o menos población o más o menos incidentes.</p>
+
+<h2>Qué muestra cada parte</h2>
+<ul>
+<li><b>Indicadores (KPI):</b> viviendas turísticas, población, HUT por 1.000 habitantes e incidentes por 1.000 habitantes de la zona seleccionada.</li>
+<li><b>Mapa:</b> colorea cada barrio según el indicador elegido, con cinco tramos de claro a oscuro. Se puede mostrar cada HUT como un punto.</li>
+<li><b>Ranking:</b> los 10 barrios con el valor más alto del indicador.</li>
+<li><b>Dispersión:</b> cada punto es un barrio y cruza dos indicadores a elegir. Muestra una recta de tendencia y el coeficiente r (de −1 a 1).</li>
+<li><b>Distritos:</b> el mismo indicador agregado por distrito. El filtro de distrito actualiza todo.</li>
+</ul>
+
+<h2>Cómo obtener los datos</h2>
+<p>Todos los archivos son gratuitos y de Open Data BCN (licencia CC BY 4.0). Para cada uno: abre el enlace, entra en «Datos y recursos», elige el CSV del año más reciente y pulsa «Descargar». Guarda todos los CSV en una carpeta, por ejemplo <code>entrega_dashboard</code>, junto con los dos HTML. En el dashboard pulsa «Cargar carpeta entrega_dashboard» y elige esa carpeta: se reconoce cada archivo por su nombre y se carga el año más reciente de cada uno. En Chrome y Edge el navegador recuerda la última carpeta elegida; en otros navegadores hay que buscarla cada vez. También puedes cargar cada archivo por separado con su botón. Los CSV se leen desde tu ordenador, sin subirse a ningún sitio, para que funcione al abrir el HTML con doble clic.</p>
+<table>
+<tr><th>Fuente</th><th>Dataset</th><th>Enlace</th></tr>
+<tr><td>Viviendas turísticas</td><td>Registro HUT (el archivo <code>hut_comunicacio_opendata.csv</code> de la práctica)</td><td><a href="https://opendata-ajuntament.barcelona.cat/">opendata-ajuntament.barcelona.cat</a>, buscar «HUT»</td></tr>
+<tr><td>Población</td><td>Padró municipal, <code>pad_mdbas</code> (archivo <code>AÑO_pad_mdbas.csv</code>)</td><td><a href="https://opendata-ajuntament.barcelona.cat/data/en/dataset/pad_mdbas">…/dataset/pad_mdbas</a></td></tr>
+<tr><td>Renta familiar</td><td>Renda disponible de les llars per persona (archivo <code>AÑO_renda_disponible_llars_per_persona.csv</code>)</td><td><a href="https://opendata-ajuntament.barcelona.cat/data/en/dataset?q=&name=est-renda-familiar">…/dataset?name=est-renda-familiar</a></td></tr>
+<tr><td>Incidentes</td><td>Incidents gestionats per la Guàrdia Urbana (archivo <code>AÑO_incidents_gestionats_gub.csv</code>)</td><td><a href="https://opendata-ajuntament.barcelona.cat/data/dataset/incidents-gestionats-gub">…/dataset/incidents-gestionats-gub</a></td></tr>
+<tr><td>Límites de barrios</td><td>GeoJSON de 73 barrios (se carga solo)</td><td><a href="https://raw.githubusercontent.com/martgnz/bcn-geodata/master/barris/barris.geojson">martgnz/bcn-geodata</a></td></tr>
+</table>
+<p>Consejo: usa el mismo año o años cercanos en todos los archivos. Los de incidentes pesan varios MB y tardan unos segundos en cargarse.</p>
+
+<h2>Cómo se procesan</h2>
+<ol>
+<li>Las columnas se leen sin importar mayúsculas, acentos ni guiones bajos (<code>Codi_Barri</code> y <code>CODI_BARRI</code> son lo mismo).</li>
+<li>Cada fila se asigna a un barrio por su código (<code>Codi_Barri</code>, a 2 dígitos). Si no hay código, se usa el nombre del barrio.</li>
+<li>Población y renta usan solo el año más reciente de cada archivo. La población (columna <code>Valor</code>) suma las secciones censales de cada barrio; la renta (columna <code>Import_Euros</code>, euros por persona) es la media de las secciones del barrio, sin ponderar por población.</li>
+<li>Las HUT se cuentan por barrio y los incidentes se suman con la columna <code>Numero_incidents_GUB</code>; los que no traen barrio se ignoran. «Por km²» usa la propiedad <code>AREA</code> del GeoJSON y «por 1.000 hab.» usa la población.</li>
+<li>Los colores del mapa son cuantiles de los barrios visibles; en distritos, los ratios se calculan sobre la suma, y la renta es la media ponderada por población.</li>
+</ol>
+
+<h2>Limitaciones</h2>
+<ul>
+<li>El dashboard se ha comprobado con los archivos de padrón 2026, renta 2023 e incidentes 2025. Las columnas se detectan por su nombre: si Open Data BCN cambia el formato, el dashboard avisa cuando no encuentra el barrio, pero el valor elegido podría no ser el esperado.</li>
+<li>La renta (2023), la población (2026) y los incidentes (2025) son de años distintos, y la media de la renta por secciones no pondera por habitantes.</li>
+<li>Correlación no es causalidad: que dos indicadores se muevan juntos no explica por qué.</li>
+<li>Los incidentes dependen de dónde se registra la actividad, no solo de cuánta hay. Las HUT registradas no equivalen a la oferta turística real.</li>
+<li>Los barrios con poca población disparan los ratios «por 1.000 habitantes».</li>
+</ul>
+
+<h2>Licencia</h2>
+<p>Datos: Open Data BCN (Ajuntament de Barcelona), CC BY 4.0. Mapa base: OpenFreeMap, © OpenStreetMap. Librerías: MapLibre GL JS, Chart.js y PapaParse.</p>
+</article></main>
+<footer>Fuente: Open Data BCN (Ajuntament de Barcelona), licencia CC BY 4.0 · Mapa base: OpenFreeMap, © OpenStreetMap</footer>
+</body></html>
